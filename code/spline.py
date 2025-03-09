@@ -1,6 +1,6 @@
 import numpy as np
-from lu import lu
-from tls import solver
+from .lu import lu
+from .tls import solver
 
 class CubicSpline():
     def __init__(self, X: np.array, Y: np.array, BC: np.array):
@@ -15,6 +15,7 @@ class CubicSpline():
         if len(BC) != 2:
             raise AssertionError
 
+        self.nodes = X
         self.size = len(X) - 1
         self.params = [
             np.zeros(self.size),
@@ -78,4 +79,16 @@ class CubicSpline():
             
             for i in range(len(X) - 1):
                 self.params[0][i] = (dy[i] - self.params[2][i] * dx[i] - self.params[1][i] * dx[i]**2) / dx[i]**3
-    
+
+    def eval(self, x: float) -> float:
+        if x < self.nodes[0]:
+            raise ValueError
+        if x > self.nodes[-1]:
+            raise ValueError
+        
+        k = 0
+
+        while x > self.nodes[k + 1]:
+            k = k + 1
+
+        return self.params[0][k] * (x - self.nodes[k])**3 + self.params[1][k] * (x - self.nodes[k])**2 + self.params[2][k] * (x - self.nodes[k]) + self.params[3][k]
