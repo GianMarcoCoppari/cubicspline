@@ -1,3 +1,6 @@
+"""
+Defines the LU matrix decomposition algorithm. It is specialized for tridiagonal matrices.
+"""
 import numpy as np
 
 def lu(v: np.array, u: np.array, w: np.array) -> list[np.array, np.array, np.array]:
