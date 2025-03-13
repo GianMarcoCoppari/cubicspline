@@ -16,13 +16,13 @@ class TestDecompositionLU(unittest.TestCase):
     
     # test known problems
     def test_known_solution(self):
-        v, u, w = np.array([3, 2, 2]), np.array([6, 10, 8, 4]), np.array([3, 2, 2])
+        v, u, w = np.array([2, 2]), np.array([10, 8, 8]), np.array([3, 2])
         
         diags = lu(v, u, w)
         sol = [
-            np.array([3, 2, 2]), 
-            np.array([6, 17/2, 128/17, 111/32]), 
-            np.array([1/2, 4/17, 17/64])
+            np.array([2, 2]), 
+            np.array([10, 37/5, 276/37]), 
+            np.array([3/10, 10/37])
         ]
 
         for i in range(len(sol)):

@@ -49,9 +49,9 @@ class TestCubicSpline(unittest.TestCase):
 
         cs = CubicSpline(X, Y, BC)
         sol = [
-            np.array([443/666, -153/148, 287/296, -805/296]),
-            np.array([-197/74, 123/37, -213/74, 435/148]),
-            np.array([0, 147/74, 213/74, 3]),
+            np.array([515/828, -297/368, 35/368, 203/368]),
+            np.array([-233/92, 141/46, -327/184, -111/92]),
+            np.array([0, 147/92, 96/23, -165/92]),
             np.array([2, -4, 5, 7])
         ]
 
@@ -123,6 +123,23 @@ class TestCubicSpline(unittest.TestCase):
         for i in range(len(splines)):
             for p in range(len(splines[i].params)):
                 self.assertAlmostEqual(solutions[i][p][0], splines[i].params[p][0])
+
+    def test_left_edge_derivative(self):
+        X = np.array([1, 4, 6, 8, 10])
+        Y = np.array([2, -4, 5, 7, 3])
+        BC = np.array([0, 0])
+
+        spline = CubicSpline(X, Y, BC)
+        self.assertAlmostEqual(spline.params[2][0], BC[0])
+
+    def test_right_edge_derivative(self):
+        X = np.array([1, 4, 6, 8, 10])
+        Y = np.array([2, -4, 5, 7, 3])
+        BC = np.array([0, 0])
+
+        spline = CubicSpline(X, Y, BC)
+        a, b, c, d = spline.params
+        self.assertAlmostEqual(3 * a[-1] * (X[-1] - X[-2])**2 + 2 * b[-1] * (X[-1] - X[-2]) + c[-1], BC[1])
 
 class TestEvalFunction(unittest.TestCase):
     def test_invalid_lower_input(self):
