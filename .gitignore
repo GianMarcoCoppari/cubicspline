@@ -4,4 +4,3 @@ __init__.py
 .coverage
 htmlcov
 main.py
-*.png
