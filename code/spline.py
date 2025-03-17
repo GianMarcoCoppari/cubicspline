@@ -3,8 +3,8 @@ Defines the CubicSpline class.
 """
 
 import numpy as np
-from .lu import lu
-from .tls import solver
+from lu import lu
+from tls import solver
 
 class CubicSpline():
     """
