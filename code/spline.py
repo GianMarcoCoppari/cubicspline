@@ -60,14 +60,8 @@ class CubicSpline():
 
         self.nodes = X
         self.size = len(X) - 1
-        self.params = [
-            np.zeros(self.size),
-            np.zeros(self.size),
-            np.zeros(self.size),
-            np.zeros(self.size)
-        ]
-        
-        print(self.params)
+        self.params = []
+
 
         dx = np.array([X[i + 1] - X[i] for i in range(self.size)])
         dy = np.array([Y[i + 1] - Y[i] for i in range(self.size)])
@@ -129,46 +123,28 @@ class CubicSpline():
         beta, alpha, gamma = lu(v, u, w)
         sol = solver(beta, alpha, gamma, delta)
 
-        return [np.array([sol[0]]),
-                np.array([sol[1]]),
-                np.array([BC[0]]),
-                np.array([Y[0]])]
+        return [sol[:1], sol[1:], BC[:1], Y[:len(dx)]]
+
+
     def __multiple_point_spline(self, dx: np.array, dy: np.array, BC: np.array, Y: np.array) -> list[np.array, np.array, np.array, np.array]:
-        v = np.array([dx[i] for i in range(2, len(dx))])
-        w = np.array([dx[i] for i in range(len(dx) - 2)])
-        u = np.array([2 * (dx[i] + dx[i+1]) for i in range(len(dx) - 1)])
+        v = dx[2:]
+        w = dx[:-2]
+        u = 2 * (dx[:-1] + dx[1:])
 
-        print("v:", v)
-        print("u:", u)
-        print("w:", w)
         
-        delta = np.array([(dy[i]/dx[i] * dx[i+1] + dy[i+1]/dx[i+1] * dx[i]) for i in range(len(dx) - 1)])
-        delta = 3 * delta
-
+        delta = 3 * (dy[:-1]/dx[:-1] * dx[1:] + dy[1:]/dx[1:] * dx[:-1])
         delta[0]  = delta[0]  - dx[1]  * BC[0]
         delta[-1] = delta[-1] - dx[-1] * BC[-1]
 
         beta, alpha, gamma = lu(v, u, w)
         sol = solver(beta, alpha, gamma, delta)
 
-        pars = [
-            np.zeros(len(dx)), # paramteri a
-            np.zeros(len(dx)), # parametri b
-            np.zeros(len(dx)), # parametri c
-            np.zeros(len(dx))  # paramteri d
-        ]
-
-        pars[2] = np.concatenate((BC[:1], sol))
         
-        
-        for i in range(len(dx) - 1):
-            pars[0][i] = ((pars[2][i] + pars[2][i + 1]) * dx[i] - 2 * dy[i]) / dx[i]**3
-        pars[0][-1] = ((pars[2][-1] + BC[-1]) * dx[-1] - 2 * dy[-1]) / dx[-1]**3
+        c = np.concat((BC[:1], sol))
+        next = np.concat((sol, BC[:-1]))
 
-        for i in range(len(dx) - 1):
-            pars[1][i] = (3 * dy[i] - (pars[2][i + 1] + 2 * pars[2][i]) * dx[i]) / dx[i]**2
-        pars[1][-1] = (3 * dy[-1] - (BC[-1] + 2 * pars[2][-1]) * dx[-1]) / dx[-1]**2
+        a = ((c + next) * dx - 2 * dy)/dx**3
+        b = (3 * dy - (next + 2 * c) * dx)/dx**2
+        d = Y[:len(dx)]
 
-        pars[3] = np.array([Y[i] for i in range(len(dx))])
-
-        return pars
+        return [a, b, c, d]
