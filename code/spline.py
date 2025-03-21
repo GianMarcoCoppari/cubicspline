@@ -17,7 +17,7 @@ class CubicSpline():
     Y : np.array
         Contains y values of spline nodes.
     BC : np.array
-        Contains left and right boundary conditions. 
+        Numpy array of two elements containing first derivatives at first and last node, respectively.
     """
 
     def __init__(self, X: np.array, Y: np.array, BC: np.array):
@@ -31,7 +31,7 @@ class CubicSpline():
         Y : np.array
             Contains y values of spline nodes.
         BC : np.array
-            Contains left and right boundary conditions.
+            Numpy array of two elements containing first derivatives at first and last node, respectively.
 
         Returns
         ---------------
