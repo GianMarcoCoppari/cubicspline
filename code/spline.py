@@ -3,8 +3,8 @@ Defines the CubicSpline class.
 """
 
 import numpy as np
-from .lu import lu
-from .tls import solver
+from lu import lu
+from tls import solver
 
 class CubicSpline():
     """
@@ -107,18 +107,11 @@ class CubicSpline():
     
 
     def __two_point_spline(self, dx: np.array, dy: np.array, BC: np.array, Y: np.array) -> list[np.array, np.array, np.array, np.array]:
-        v, u, w = np.zeros(len(dx)), np.zeros(len(dx) + 1), np.zeros(len(dx))
-        delta = np.zeros(len(dx) + 1)
+        v = 3 * dx**2
+        u = np.array([dx[0]**3, 2 * dx[0]])
+        w = dx**2
 
-        v[0] = 3 * dx[0]**2
-            
-        u[0] = dx[0]**3
-        u[1] = 2 * dx[0]
-            
-        w[0] = dx[0]**2
-
-        delta[0] = dy[0] - BC[0] * dx[0]
-        delta[1] = BC[1] - BC[0]
+        delta = np.array([dy[0] - BC[0] * dx[0], BC[1] - BC[0]])
 
         beta, alpha, gamma = lu(v, u, w)
         sol = solver(beta, alpha, gamma, delta)
