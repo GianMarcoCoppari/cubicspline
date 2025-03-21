@@ -3,8 +3,8 @@ Defines the CubicSpline class.
 """
 
 import numpy as np
-from lu import lu
-from tls import solver
+from .lu import lu
+from .tls import solver
 
 class CubicSpline():
     """
@@ -64,63 +64,19 @@ class CubicSpline():
             np.zeros(self.size),
             np.zeros(self.size),
             np.zeros(self.size),
-            np.zeros(self.size)]
+            np.zeros(self.size)
+        ]
         
+        print(self.params)
 
         dx = np.array([X[i + 1] - X[i] for i in range(self.size)])
         dy = np.array([Y[i + 1] - Y[i] for i in range(self.size)])
         
 
         if len(X) == 2:
-            v, u, w = np.zeros(self.size), np.zeros(self.size + 1), np.zeros(self.size)
-            delta = np.zeros(self.size + 1)
-
-            v[0] = 3 * dx[0]**2
-            
-            u[0] = dx[0]**3
-            u[1] = 2 * dx[0]
-            
-            w[0] = dx[0]**2
-
-            delta[0] = dy[0] - BC[0] * dx[0]
-            delta[1] = BC[1] - BC[0]
-        
+            self.params = self.__two_point_spline(dx, dy, BC, Y)
         else:
-            v = np.array([dx[i] for i in range(2, len(dx))])
-            w = np.array([dx[i] for i in range(len(dx) - 2)])
-            u = np.array([2 * (dx[i] + dx[i+1]) for i in range(len(dx) - 1)])
-
-        
-            delta = np.array([(dy[i]/dx[i] * dx[i+1] + dy[i+1]/dx[i+1] * dx[i]) for i in range(len(dx) - 1)])
-            delta = 3 * delta
-
-            delta[0]  = delta[0]  - dx[1]  * BC[0]
-            delta[-1] = delta[-1] - dx[-1] * BC[-1]
-
-
-        beta, alpha, gamma = lu(v, u, w)
-        sol = solver(beta, alpha, gamma, delta)
-
-
-        if len(X) == 2:
-            self.params[0][0] = sol[0]
-            self.params[1][0] = sol[1]
-            self.params[2][0] = BC[0]
-            self.params[3][0] = Y[0]
-        else:
-            self.params[2][0] = BC[0]
-            for i in range(1, self.size):
-                self.params[2][i] = sol[i - 1]
-
-            for i in range(self.size - 1):
-                self.params[0][i] = ((self.params[2][i] + self.params[2][i + 1]) * dx[i] - 2 * dy[i]) / dx[i]**3
-            self.params[0][-1] = ((self.params[2][-1] + BC[-1]) * dx[-1] - 2 * dy[-1]) / dx[-1]**3
-
-            for i in range(self.size - 1):
-                self.params[1][i] = (3 * dy[i] - (self.params[2][i + 1] + 2 * self.params[2][i]) * dx[i]) / dx[i]**2
-            self.params[1][-1] = (3 * dy[-1] - (BC[-1] + 2 * self.params[2][-1]) * dx[-1]) / dx[-1]**2
-
-            self.params[3] = np.array([Y[i] for i in range(len(X) - 1)])
+            self.params = self.__multiple_point_spline(dx, dy, BC, Y)
             
             
     def eval(self, x: float) -> float:
@@ -154,3 +110,65 @@ class CubicSpline():
             k = k + 1
 
         return self.params[0][k] * (x - self.nodes[k])**3 + self.params[1][k] * (x - self.nodes[k])**2 + self.params[2][k] * (x - self.nodes[k]) + self.params[3][k]
+    
+
+    def __two_point_spline(self, dx: np.array, dy: np.array, BC: np.array, Y: np.array) -> list[np.array, np.array, np.array, np.array]:
+        v, u, w = np.zeros(len(dx)), np.zeros(len(dx) + 1), np.zeros(len(dx))
+        delta = np.zeros(len(dx) + 1)
+
+        v[0] = 3 * dx[0]**2
+            
+        u[0] = dx[0]**3
+        u[1] = 2 * dx[0]
+            
+        w[0] = dx[0]**2
+
+        delta[0] = dy[0] - BC[0] * dx[0]
+        delta[1] = BC[1] - BC[0]
+
+        beta, alpha, gamma = lu(v, u, w)
+        sol = solver(beta, alpha, gamma, delta)
+
+        return [np.array([sol[0]]),
+                np.array([sol[1]]),
+                np.array([BC[0]]),
+                np.array([Y[0]])]
+    def __multiple_point_spline(self, dx: np.array, dy: np.array, BC: np.array, Y: np.array) -> list[np.array, np.array, np.array, np.array]:
+        v = np.array([dx[i] for i in range(2, len(dx))])
+        w = np.array([dx[i] for i in range(len(dx) - 2)])
+        u = np.array([2 * (dx[i] + dx[i+1]) for i in range(len(dx) - 1)])
+
+        print("v:", v)
+        print("u:", u)
+        print("w:", w)
+        
+        delta = np.array([(dy[i]/dx[i] * dx[i+1] + dy[i+1]/dx[i+1] * dx[i]) for i in range(len(dx) - 1)])
+        delta = 3 * delta
+
+        delta[0]  = delta[0]  - dx[1]  * BC[0]
+        delta[-1] = delta[-1] - dx[-1] * BC[-1]
+
+        beta, alpha, gamma = lu(v, u, w)
+        sol = solver(beta, alpha, gamma, delta)
+
+        pars = [
+            np.zeros(len(dx)), # paramteri a
+            np.zeros(len(dx)), # parametri b
+            np.zeros(len(dx)), # parametri c
+            np.zeros(len(dx))  # paramteri d
+        ]
+
+        pars[2] = np.concatenate((BC[:1], sol))
+        
+        
+        for i in range(len(dx) - 1):
+            pars[0][i] = ((pars[2][i] + pars[2][i + 1]) * dx[i] - 2 * dy[i]) / dx[i]**3
+        pars[0][-1] = ((pars[2][-1] + BC[-1]) * dx[-1] - 2 * dy[-1]) / dx[-1]**3
+
+        for i in range(len(dx) - 1):
+            pars[1][i] = (3 * dy[i] - (pars[2][i + 1] + 2 * pars[2][i]) * dx[i]) / dx[i]**2
+        pars[1][-1] = (3 * dy[-1] - (BC[-1] + 2 * pars[2][-1]) * dx[-1]) / dx[-1]**2
+
+        pars[3] = np.array([Y[i] for i in range(len(dx))])
+
+        return pars
