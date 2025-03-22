@@ -37,26 +37,20 @@ def lu(v: np.array, u: np.array, w: np.array) -> list[np.array, np.array, np.arr
     if len(u) != len(v) + 1:
         raise AssertionError
 
-    beta  = np.array(v)
-    alpha = np.zeros(len(u))
-    gamma = np.zeros(len(w))
 
-    # prompt for the loop
-    alpha[0] = u[0]
-    if u[0] != 0:
-        gamma[0] = w[0] / u[0]
+    seed = np.array([u[0], v[0]])
+    if not seed[-2] == 0:
+        seed = np.concatenate((seed, w[:1]/seed[-2]))
     else:
         raise ZeroDivisionError
-
-    for i in range(1, len(w)):
-        alpha[i] = u[i] - beta[i - 1] * gamma[i - 1]
-        
-        if alpha[i] != 0:
-            gamma[i] = w[i] / alpha[i]        
+    
+    for i in range(1, len(u) - 1):
+        seed = np.concatenate((seed, u[i:i+1] - seed[-1] * seed[-2], v[i:i+1]))
+        if not seed[-2] == 0:
+            seed = np.concatenate((seed, w[i:i+1] / seed[-2]))
         else:
             raise ZeroDivisionError
-        
-    alpha[len(u) - 1] = u[len(u) - 1] - beta[len(u) - 2] * gamma[len(u) - 2]
 
+    seed = np.concatenate((seed, u[-1:] - seed[-1] * seed[-2]))
 
-    return [beta, alpha, gamma]
+    return [seed[1::3], seed[::3], seed[2::3]] # [beta, alpha, gamma], in the order

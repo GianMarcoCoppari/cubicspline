@@ -117,8 +117,6 @@ class CubicSpline():
         sol = solver(beta, alpha, gamma, delta)
 
         return [sol[:1], sol[1:], BC[:1], Y[:len(dx)]]
-
-
     def __multiple_point_spline(self, dx: np.array, dy: np.array, BC: np.array, Y: np.array) -> list[np.array, np.array, np.array, np.array]:
         v = dx[2:]
         w = dx[:-2]
