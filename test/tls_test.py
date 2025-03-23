@@ -5,13 +5,13 @@ from ..code.tls import *
 class TestForewardSubstitution(unittest.TestCase):
     # check dimensions
     def test_min_size(self):
-        self.assertRaises(AssertionError, foreward, np.array([]), np.array([1]), np.array([2]))
+        self.assertRaises(AssertionError, forward, np.array([]), np.array([1]), np.array([2]))
     
     def test_diagonal_solution_size(self):
-        self.assertRaises(AssertionError, foreward, np.array([1, 1, 1]), np.array([1, 1, 1, 1]), np.array([1, 1, 1, 1, 1]))
+        self.assertRaises(AssertionError, forward, np.array([1, 1, 1]), np.array([1, 1, 1, 1]), np.array([1, 1, 1, 1, 1]))
 
     def test_diagonal_lower_diagonal_dimension(self):
-        self.assertRaises(AssertionError, foreward, np.array([1, 1, 1]), np.array([1, 1, 1]), np.array([1, 1, 1]))
+        self.assertRaises(AssertionError, forward, np.array([1, 1, 1]), np.array([1, 1, 1]), np.array([1, 1, 1]))
 
     #check divisions by zero
     def test_invalid_alpha(self):
@@ -23,15 +23,18 @@ class TestForewardSubstitution(unittest.TestCase):
         ]
 
         for i in range(len(alphas)):
-            self.assertRaises(ValueError, foreward, np.array([3, 2, 2]), alphas[i], np.array([1, 2, 3, 4]))
+            self.assertRaises(ValueError, forward, np.array([3, 2, 2]), alphas[i], np.array([1, 2, 3, 4]))
 
     # check known solution
     def test_known_solution(self):
-        sol = foreward(np.array([2, 2]), np.array([10, 37/5, 276/37]), np.array([57/2, 33, -6]))
-        x = np.array([57/20, 273/74, -165/92])
+        beta = np.array([2, 2])
+        alpha = np.array([10, 37/5, 276/37])
+        delta = np.array([57/2, 33, -6])
 
-        for i in range(len(sol)):
-            self.assertAlmostEqual(sol[i], x[i])
+        x = forward(beta, alpha, delta)
+        sol = np.array([57/20, 273/74, -165/92])
+
+        self.assertTrue(np.allclose(x, sol))
 
 class TestBackwardSubstitution(unittest.TestCase):
     # check dimensions
