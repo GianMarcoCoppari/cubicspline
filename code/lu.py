@@ -38,19 +38,17 @@ def lu(v: np.array, u: np.array, w: np.array) -> list[np.array, np.array, np.arr
         raise AssertionError
 
 
-    seed = np.array([u[0], v[0]])
-    if not seed[-2] == 0:
-        seed = np.concatenate((seed, w[:1]/seed[-2]))
-    else:
-        raise ZeroDivisionError
+    pars = np.array([
+        u,
+        np.concatenate(([0], v)),
+        np.concatenate(([0], w))
+    ], dtype = np.float64)
     
-    for i in range(1, len(u) - 1):
-        seed = np.concatenate((seed, u[i:i+1] - seed[-1] * seed[-2], v[i:i+1]))
-        if not seed[-2] == 0:
-            seed = np.concatenate((seed, w[i:i+1] / seed[-2]))
+    for i in range(1, len(u)):
+        pars[0, i] = pars[0, i] * pars[0, i-1] - pars[1, i] * pars[2, i]
+        if not pars[0, i-1] == 0:
+            pars[::2, i] = pars[::2, i] / pars[0, i-1]
         else:
             raise ZeroDivisionError
 
-    seed = np.concatenate((seed, u[-1:] - seed[-1] * seed[-2]))
-
-    return [seed[1::3], seed[::3], seed[2::3]] # [beta, alpha, gamma], in the order
+    return [pars[1, 1:], pars[0], pars[2, 1:]]
