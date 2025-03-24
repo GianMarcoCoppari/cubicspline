@@ -1,6 +1,8 @@
 """
 Defines the foreward-backward algorithm to solve tridiagonal linear systems.
 """
+
+
 import numpy as np
 
 def backward(gamma: np.array, temp: np.array) -> np.array:

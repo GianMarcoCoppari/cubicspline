@@ -1,6 +1,6 @@
 import unittest
 import numpy as np
-from ..code.spline import CubicSpline
+from .spline import CubicSpline
 
 class TestCubicSpline(unittest.TestCase):
     def test_X_min_size(self):

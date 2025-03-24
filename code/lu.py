@@ -1,9 +1,11 @@
 """
 Defines the LU matrix decomposition algorithm. It is specialized for tridiagonal matrices.
 """
+
+
 import numpy as np
 
-def lu(v: np.array, u: np.array, w: np.array) -> list[np.array, np.array, np.array]:
+def lu(v: np.array, u: np.array, w: np.array) -> list:
     """ 
     Lower-Upper Matrix Factorization algorithm using numpy arrays. 
         
@@ -38,16 +40,23 @@ def lu(v: np.array, u: np.array, w: np.array) -> list[np.array, np.array, np.arr
         raise AssertionError
 
 
-    pars = np.array([
-        u,
-        np.concatenate(([0], v)),
-        np.concatenate(([0], w))
-    ], dtype = np.float64)
+    pars = np.array([u[1:], v, w], dtype = np.float64)
     
-    for i in range(1, len(u)):
-        pars[0, i] = pars[0, i] * pars[0, i-1] - pars[1, i] * pars[2, i]
-        if not pars[0, i-1] == 0:
-            pars[::2, i] = pars[::2, i] / pars[0, i-1]
+    # manually compute first element
+    pars[0, 0] = pars[0, 0] * u[0] - pars[1, 0] * pars[2, 0] 
+    
+    # scaled coefficeints, il primo ed il terzo elemento della prima colonna 
+    # per il primo coefficiente della colonna precedente
+    if not u[0] == 0:
+        pars[::2, 0] = pars[::2, 0] / u[0]
+    else:
+        raise ZeroDivisionError
+    
+    for i in range(1, len(u) - 1):
+        pars[0, i] = pars[0, i] * pars[0, i - 1] - pars[1, i] * pars[2, i]
+        
+        if not pars[0, i - 1] == 0:
+            pars[::2, i] = pars[::2, i] / pars[0, i - 1]
         else:
             raise ZeroDivisionError
 
