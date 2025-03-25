@@ -109,6 +109,47 @@ class TestDecompositionLU(unittest.TestCase):
 
         self.assertTrue(map(np.array_equal, diags, sol))
 
+    def test_null_lower_diagonal(self):
+        """
+            Factorize an upper triangular matrix. 
+            According to the unitriangular hypothesis of the upper triagular matrix 
+            the result should be a diagonal matrix (beta = 0, only alpha != 0) and the 
+            upper unitringular matrix
+        """
+
+        v = np.array([0, 0, 0],     dtype = np.float64)
+        u = np.array([2, -1, 7, 4], dtype = np.float64)
+        w = np.array([-1, -1, -5],  dtype = np.float64)
+
+        sol = [
+            np.array([0, 0, 0],        dtype = np.float64),
+            np.array([2, 1, 7, 4],     dtype = np.float64),
+            np.array([-1/2, -1, -5/7], dtype = np.float64)
+        ]
+        diags = lu(v, u, w)
+
+        self.assertTrue(map(np.array_equal, sol, diags))
+
+    def test_null_upper_diagonal(self):
+        """
+            Check the LU factorization in case the upper diagonal is null.
+            In this case we expect gamma = 0, with the upper unitrangular matrix becoming the identity matrix.
+            In this case the lower triangular is already facorized.
+        """
+
+        v = np.array([10000000, 3, -3])
+        u = np.array([3, -1, 5, 0.00000005])
+        w = np.array([0, 0, 0])
+
+        sol = [
+            np.array([10000000, 3, -3]),
+            np.array([3, -1, 5, 0.00000005]),
+            np.array([0, 0, 0])
+        ]
+        diags = lu(v, u, w)
+
+        self.assertTrue(map(np.array_equal, sol, diags))
+
     # division by zero 
     def test_first_diagonal_element_zero(self):
         """
