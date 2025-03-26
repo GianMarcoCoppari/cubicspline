@@ -5,7 +5,7 @@ Defines the foreward-backward algorithm to solve tridiagonal linear systems.
 
 import numpy as np
 
-def backward(gamma: np.array, temp: np.array) -> np.array:
+def backward(gamma: np.ndarray, temp: np.ndarray) -> np.ndarray:
     """ 
         Backward substitution algorithm using numpy arrays. Specialized algorithm for unitriangular upper matrices with the only non-zero elements in the adjacent off-diagonal elements.
         
@@ -40,7 +40,7 @@ def backward(gamma: np.array, temp: np.array) -> np.array:
 
     return np.flip(sol)
 
-def forward(beta: np.array, alpha: np.array, delta: np.array) -> np.array:
+def forward(beta: np.ndarray, alpha: np.ndarray, delta: np.ndarray) -> np.ndarray:
     """ 
         Foreward substitution algorithm using numpy arrays. Specialized algorithm for lower triangula matrices with the only non-zero elements in the main diagonal and its lower djacent off-diagonal.
         
@@ -82,7 +82,7 @@ def forward(beta: np.array, alpha: np.array, delta: np.array) -> np.array:
         
     return temp
 
-def solver(beta: np.array, alpha: np.array, gamma: np.array, delta: np.array) -> np.array:
+def solver(beta: np.ndarray, alpha: np.ndarray, gamma: np.ndarray, delta: np.ndarray) -> np.ndarray:
     """ 
         Foreward substitution algorithm using numpy arrays. Specialized algorithm for tridiagonal linear systems.
         

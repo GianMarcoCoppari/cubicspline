@@ -20,7 +20,7 @@ class CubicSpline():
         Numpy array of two elements containing first derivatives at first and last node, respectively.
     """
 
-    def __init__(self, X: np.array, Y: np.array, BC: np.array):
+    def __init__(self, X: np.ndarray, Y: np.ndarray, BC: np.ndarray):
         """
         CubicSpline constructor. Intanciate a CubicSpline object, computing all the coefficients.
 
@@ -106,7 +106,7 @@ class CubicSpline():
         return self.params[0][k] * (x - self.nodes[k])**3 + self.params[1][k] * (x - self.nodes[k])**2 + self.params[2][k] * (x - self.nodes[k]) + self.params[3][k]
     
 
-    def __two_point_spline(self, dx: np.array, dy: np.array, BC: np.array, Y: np.array) -> list[np.array, np.array, np.array, np.array]:
+    def __two_point_spline(self, dx: np.ndarray, dy: np.ndarray, BC: np.ndarray, Y: np.ndarray) -> list[np.ndarray]:
         v = 3 * dx**2
         u = np.array([dx[0]**3, 2 * dx[0]])
         w = dx**2
@@ -117,7 +117,7 @@ class CubicSpline():
         sol = solver(beta, alpha, gamma, delta)
 
         return [sol[:1], sol[1:], BC[:1], Y[:len(dx)]]
-    def __multiple_point_spline(self, dx: np.array, dy: np.array, BC: np.array, Y: np.array) -> list[np.array, np.array, np.array, np.array]:
+    def __multiple_point_spline(self, dx: np.ndarray, dy: np.ndarray, BC: np.ndarray, Y: np.ndarray) -> list[np.ndarray]:
         v = dx[2:]
         w = dx[:-2]
         u = 2 * (dx[:-1] + dx[1:])

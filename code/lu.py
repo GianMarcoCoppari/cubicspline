@@ -5,7 +5,7 @@ Defines the LU matrix decomposition algorithm. It is specialized for tridiagonal
 
 import numpy as np
 
-def lu(v: np.array, u: np.array, w: np.array) -> list:
+def lu(v: np.ndarray, u: np.ndarray, w: np.ndarray) -> list[np.ndarray]:
     """ 
     Lower-Upper Matrix Factorization algorithm using numpy arrays. 
         
