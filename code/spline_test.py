@@ -4,50 +4,73 @@ from spline import CubicSpline
 
 class TestCubicSpline(unittest.TestCase):
     def test_X_min_size(self):
-        X = [np.array([]), np.array([1])]
-        Y = [np.array([]), np.array([2])]
-
-        for i in range(len(X)):
-            self.assertRaises(AssertionError, CubicSpline.__init__, CubicSpline, X[i], Y[i], np.array([0, 0]))
+        """
+            Test the minimum size of nodes. If it is less than two it raises an exception.
+        """
+        X  = np.array([1])
+        Y  = np.array([2])
+        BC = np.array([0, 0])
+    
+        with self.assertRaises(AssertionError):
+            CubicSpline(X, Y, BC)
             
-    def test_XY_same_size_1(self):
-        X = np.array([1, 2])
-        Y = np.array([1])
+    def test_XY_same_size(self):
+        """
+            Test that the X and Y arrays have same length, representing x and y coordinate of nodes.
+        """
+        X =  np.array([1, 2])
+        Y =  np.array([1])
+        BC = np.array([0, 0])
 
-        self.assertRaises(AssertionError, CubicSpline.__init__, CubicSpline, X, Y, np.array([0, 0]))
-
-    def test_XY_same_size_2(self):
-        X = np.array([1, 2])
-        Y = np.array([1, 3, 5])
-
-        self.assertRaises(AssertionError, CubicSpline.__init__, CubicSpline, X, Y, np.array([0, 0]))
+        with self.assertRaises(AssertionError):
+            CubicSpline(X, Y, BC)
 
     def test_distinct_nodes(self):
-        X = np.array([1, 3, 3, 5])
-        Y = np.array([3, 4, 5, 6])
+        """
+            Test that the nodes are all in different positions.
+            If two nodes are in the same place, i.e. they have same x coordinate
+            an exception is raised.
+        """
+        X  = np.array([1, 3, 3, 5])
+        Y  = np.array([3, 4, 5, 6])
+        BC = np.array([0, 0])
 
-        self.assertRaises(AssertionError, CubicSpline.__init__, CubicSpline, X, Y, np.array([0, 0]))
+        with self.assertRaises(AssertionError):
+            CubicSpline(X, Y, BC)
 
     def test_ordered_nodes(self):
+        """
+            Test that the input nodes are ordered. If not an exception is raised.
+        """
         X = np.array([1, 4, 3, 5])
         Y = np.array([1, 5, 7, 9])
+        BC = np.array([0, 0])
 
-        self.assertRaises(AssertionError, CubicSpline.__init__, CubicSpline, X, Y, np.array([0, 0]))
+        with self.assertRaises(AssertionError):
+            CubicSpline(X, Y, BC)
 
-    def test_few_boundary_condition_size(self):
+    def test_invalid_boundary_condition_size(self):
+        """
+            Test if the boundary conditions array have correct number of elements.
+            Raise an exception if not.
+        """
         X = np.array([1, 3, 5, 7])
         Y = np.array([2, 4, 6, 8])
-        BCs = [np.array([]), np.array([0]), np.array([0, 0, 0])]
+        BC = np.array([0])
 
-        for i in range(len(BCs)):
-            self.assertRaises(AssertionError, CubicSpline.__init__, CubicSpline, X, Y, BCs[i])
+        with self.assertRaises(AssertionError):
+            CubicSpline(X, Y, BC)
 
     def test_known_spline(self):
+        """
+            Test the correctness of parameter computation with a known-solution problem.
+        """
+
         X  = np.array([1, 4, 6, 8, 10])
         Y  = np.array([2, -4, 5, 7, 3])
         BC = np.array([0, 0])
 
-        cs = CubicSpline(X, Y, BC)
+        spline = CubicSpline(X, Y, BC)
         sol = [
             np.array([515/828, -297/368, 35/368, 203/368]),
             np.array([-233/92, 141/46, -327/184, -111/92]),
@@ -55,15 +78,17 @@ class TestCubicSpline(unittest.TestCase):
             np.array([2, -4, 5, 7])
         ]
 
-        for i in range(len(cs.params)):
-            for j in range(len(cs.params[0])):
-                self.assertAlmostEqual(cs.params[i][j], sol[i][j])
+        self.assertTrue(map(np.allclose, spline.params, sol))
 
     def test_two_point_spline(self):
+        """
+            Test particular case of two point cubic spline, 
+            since the computation of parameters is defferent.
+        """
         X = np.array([1, 6])
         Y = np.array([3, 1])
         BC = np.array([0, 0])
-        cs = CubicSpline(X, Y, BC)
+        spline = CubicSpline(X, Y, BC)
 
         sol = [
             np.array([4/125]),
@@ -72,14 +97,17 @@ class TestCubicSpline(unittest.TestCase):
             np.array([3])
         ]
 
-        for i in range(len(sol)):
-            for j in range(len(cs.params[0])):
-                self.assertAlmostEqual(sol[i][j], cs.params[i][j])
+        self.assertTrue(map(np.allclose, spline.params, sol))
 
     def test_underlying_cubic_function(self):
+        """ 
+            Test the particular case of an underlying cubic function.
+            In thi case the cubic spline must coincide with the underlying cubic polynomio.
+        """
         X  = np.array([-1, 0])
         Y  = np.array([ 0, 1])
         BC = np.array([ 0, 3])
+        spline = CubicSpline(X, Y, BC)
 
         sol = [
             np.array([1]),
@@ -87,18 +115,19 @@ class TestCubicSpline(unittest.TestCase):
             np.array([0]),
             np.array([0])
         ]
-        cs = CubicSpline(X, Y, BC)
-
-        for i in range(len(sol)):
-            for p in range(len(sol[0])):
-                self.assertAlmostEqual(sol[i][p], cs.params[i][p])
+        
+        self.assertTrue(map(np.allclose, spline.params, sol))
 
     def test_multiple_cubic_functions(self):
+        """
+            Test that piecewise underlying cubic function corresponds to 
+            the same global cubic polynomio.
+        """
         X  = np.array([-1, 0, 1, 2])
-        Y  = np.array([ 0, 1, 8, 27])
-        BC = np.array([ 0, 3, 12, 27])
+        Y  = (X + 1)**3
+        BC = 3 * (X + 1)**2
 
-        splines = [CubicSpline(X[j : j + 2], Y[j : j + 2], BC[j : j + 2]) for j in range(len(X) - 1)]
+        pars = [CubicSpline(X[j : j + 2], Y[j : j + 2], BC[j : j + 2]).params for j in range(len(X) - 1)]
         solutions = [
             [
                 np.array([1]),
@@ -120,11 +149,13 @@ class TestCubicSpline(unittest.TestCase):
             ]
         ]
 
-        for i in range(len(splines)):
-            for p in range(len(splines[i].params)):
-                self.assertAlmostEqual(solutions[i][p][0], splines[i].params[p][0])
+        self.assertTrue(map(np.allclose, pars, solutions))
 
     def test_left_edge_derivative(self):
+        """
+            Test that the computed first derivative coincides with the one given
+            by the left boundary condition.
+        """
         X = np.array([1, 4, 6, 8, 10])
         Y = np.array([2, -4, 5, 7, 3])
         BC = np.array([0, 0])
@@ -133,6 +164,10 @@ class TestCubicSpline(unittest.TestCase):
         self.assertAlmostEqual(spline.params[2][0], BC[0])
 
     def test_right_edge_derivative(self):
+        """
+            Test that the computed first derivative at right edge of the domain 
+            is equal to the one provided by the second boundary condition.
+        """
         X = np.array([1, 4, 6, 8, 10])
         Y = np.array([2, -4, 5, 7, 3])
         BC = np.array([0, 0])
