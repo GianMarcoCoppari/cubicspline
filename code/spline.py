@@ -107,6 +107,26 @@ class CubicSpline():
     
 
     def __two_point_spline(self, dx: np.ndarray, dy: np.ndarray, BC: np.ndarray, Y: np.ndarray) -> list[np.ndarray]:
+        """
+        Private method implementing the spline parameters' computation for the 
+        special case of two point spline.
+        
+        Parameters
+        --------------
+        dx : np.array
+            Numpy array containing x displacements between consecutive nodes.
+        dy : np.array
+            Numpy array containing y displacements between consecutive nodes.
+        BC : np.array
+            Numpy array of two elements containing first derivatives at first and last node, respectively.
+        Y  : np.array
+            Numpy array containing y values of spline nodes.
+        Returns
+        ---------------
+        CubicSpline
+            Returns the list of parameters of the spline.
+        """
+        
         v = 3 * dx**2
         u = np.array([dx[0]**3, 2 * dx[0]])
         w = dx**2
@@ -118,6 +138,26 @@ class CubicSpline():
 
         return [sol[:1], sol[1:], BC[:1], Y[:len(dx)]]
     def __multiple_point_spline(self, dx: np.ndarray, dy: np.ndarray, BC: np.ndarray, Y: np.ndarray) -> list[np.ndarray]:
+        """
+        Private method implementing the spline parameters' computation for the 
+        general case of more than two point spline.
+        
+        Parameters
+        --------------
+        dx : np.array
+            Numpy array containing x displacements between consecutive nodes.
+        dy : np.array
+            Numpy array containing y displacements between consecutive nodes.
+        BC : np.array
+            Numpy array of two elements containing first derivatives at first and last node, respectively.
+        Y  : np.array
+            Numpy array containing y values of spline nodes.
+        Returns
+        ---------------
+        CubicSpline
+            Returns the list of parameters of the spline.
+        """
+
         v = dx[2:]
         w = dx[:-2]
         u = 2 * (dx[:-1] + dx[1:])
