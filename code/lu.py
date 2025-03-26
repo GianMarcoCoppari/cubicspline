@@ -60,4 +60,5 @@ def lu(v: np.array, u: np.array, w: np.array) -> list:
         else:
             raise ZeroDivisionError
 
-    return [pars[1, 1:], pars[0], pars[2, 1:]]
+
+    return [pars[1], np.concatenate((u[:1], pars[0])), pars[2]]

@@ -1,6 +1,6 @@
 import unittest
 import numpy as np
-from .lu import lu
+from lu import lu
 
 class TestDecompositionLU(unittest.TestCase):
     # dimensional checks on input values

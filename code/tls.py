@@ -36,7 +36,7 @@ def backward(gamma: np.array, temp: np.array) -> np.array:
 
     sol = temp[-1:]
     for i in range(1, len(temp)):
-        sol = np.concatenate((sol, [temp[2 - i] - sol[-1] * gamma[2 - i]]))
+        sol = np.concatenate((sol, [temp[len(temp) - 1 - i] - sol[-1] * gamma[len(temp) - 1 - i]]))
 
     return np.flip(sol)
 
@@ -81,7 +81,6 @@ def forward(beta: np.array, alpha: np.array, delta: np.array) -> np.array:
         temp = np.concatenate((temp, [(delta[i] - temp[i - 1] * beta[i - 1]) / alpha[i]]))
         
     return temp
-
 
 def solver(beta: np.array, alpha: np.array, gamma: np.array, delta: np.array) -> np.array:
     """ 
