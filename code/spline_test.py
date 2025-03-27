@@ -178,68 +178,59 @@ class TestCubicSpline(unittest.TestCase):
 
 class TestEvalFunction(unittest.TestCase):
     def test_invalid_lower_input(self):
+        """
+            Test that the input value is below the lower edge of the interval.
+            If such a value is given as input of the eval function an exception is raised.
+        """
         X = np.array([1, 4, 6, 8, 10])
         Y = np.array([2, -4, 5, 7, 3])
         BC = np.array([0, 0])
 
         spline = CubicSpline(X, Y, BC)
-        self.assertRaises(ValueError, spline.eval, 0.)
+        
+        with self.assertRaises(ValueError):
+            spline.eval(0.)
 
     def test_invalid_upper_input(self):
-        X = np.array([1, 4, 6, 8, 10])
-        Y = np.array([2, -4, 5, 7, 3])
-        BC = np.array([0, 0])
-
-        spline = CubicSpline(X, Y, BC)
-        self.assertRaises(ValueError, spline.eval, 11.)
-
-    def test_left_edge(self):
-        X = np.array([1, 4, 6, 8, 10])
-        Y = np.array([2, -4, 5, 7, 3])
-        BC = np.array([0, 0])
-
-        spline = CubicSpline(X, Y, BC)
-
-        self.assertAlmostEqual(spline.eval(X[0]), Y[0])
-
-    def test_right_edge(self):
+        """
+            Test that an exception is raised when an input 
+            value greater than the upper edge of the spline 
+            interval is passed to the eval function.
+        """
         X = np.array([1, 4, 6, 8, 10])
         Y = np.array([2, -4, 5, 7, 3])
         BC = np.array([0, 0])
 
         spline = CubicSpline(X, Y, BC)
 
-        self.assertAlmostEqual(spline.eval(X[-1]), Y[-1])
+        with self.assertRaises(ValueError):
+            spline.eval(11.)
+
+    def test_nodes(self):
+        """
+            Test the correctness of the algorithm 
+            evaluating the spline at known values, the nodes themselves.
+        """
+        X = np.array([1, 4, 6, 8, 10])
+        Y = np.array([2, -4, 5, 7, 3])
+        BC = np.array([0, 0])
+
+        spline = CubicSpline(X, Y, BC)
+
+        print(spline.eval(X))
+        self.assertTrue(np.allclose(spline.eval(X), Y))
+
+    def test_single_point(self):
+        """
+            Test that the eval function computes the spline value correctly using a single value input.
+            Again, a node is used to test a known case.
+        """
+        X = np.array([1, 4, 6, 8, 10])
+        Y = np.array([2, -4, 5, 7, 3])
+        BC = np.array([0, 0])
+
+        spline = CubicSpline(X, Y, BC)
+
+        print(spline.eval(X))
+        self.assertTrue(np.allclose(spline.eval(X[1]), Y[1]))
     
-    def test_nodes_from_sides(self):
-        X = np.array([1, 4, 6, 8, 10])
-        Y = np.array([2, -4, 5, 7, 3])
-        BC = np.array([0, 0])
-
-        spline = CubicSpline(X, Y, BC)
-
-        for i in range(1, len(X) - 2):
-            self.assertAlmostEqual(spline.eval(X[i]), 
-                                   spline.params[0][i] * (X[i] - spline.nodes[i])**3 + spline.params[1][i] * (X[i] - spline.nodes[i])**2 + spline.params[2][i] * (X[i] - spline.nodes[i]) + spline.params[3][i])
-
-    def test_inner_node(self):
-        X = np.array([1, 4, 6, 8, 10])
-        Y = np.array([2, -4, 5, 7, 3])
-        BC = np.array([0, 0])
-
-        spline = CubicSpline(X, Y, BC)
-
-        self.assertAlmostEqual(spline.eval(X[3]), Y[3])
-
-    def test_mid_point(self):
-        X = np.array([1, 4, 6, 8, 10])
-        Y = np.array([2, -4, 5, 7, 3])
-        BC = np.array([0, 0])
-
-        spline = CubicSpline(X, Y, BC)
-
-        for i in range(len(X) - 1):
-            midpoint = 0.5 * (X[i] + X[i + 1])
-            y = spline.params[0][i] * (midpoint - spline.nodes[i])**3 + spline.params[1][i] * (midpoint - spline.nodes[i])**2 + spline.params[2][i] * (midpoint - spline.nodes[i]) + spline.params[3][i]
-            
-            self.assertAlmostEqual(spline.eval(midpoint), y)

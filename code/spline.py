@@ -73,18 +73,18 @@ class CubicSpline():
             self.params = self.__multiple_point_spline(dx, dy, BC, Y)
             
             
-    def eval(self, x: float) -> float:
+    def eval(self, x: np.ndarray) -> np.ndarray:
         """
         Evaluate the spline value at a given x value.
 
         Parameters
         ------------------
-        x : float
-            Location at which computing the value.
+        x : np.array
+            Set of points at which compute the spline.
         
         Returns
         ------------------
-        float:
+        np.array:
             Returns the corresponding values.
 
         Raises
@@ -93,18 +93,18 @@ class CubicSpline():
             - the input value is out of the node domain.
         """
 
-        if x < self.nodes[0]:
+        if np.min(x) < self.nodes[0]:
             raise ValueError
-        if x > self.nodes[-1]:
+        if np.max(x) > self.nodes[-1]:
             raise ValueError
         
-        k = 0
+        k = np.searchsorted(self.nodes, x, 'right') - 1 # get the right interval index
+        k = np.clip(k, 0, len(self.nodes) - 2)          # squeeze the indices in the right range
 
-        while x > self.nodes[k + 1]:
-            k = k + 1
+        dx = x - self.nodes[k]
+        return self.params[0][k] * dx**3 + self.params[1][k] * dx**2 + self.params[2][k] * dx + self.params[3][k]
 
-        return self.params[0][k] * (x - self.nodes[k])**3 + self.params[1][k] * (x - self.nodes[k])**2 + self.params[2][k] * (x - self.nodes[k]) + self.params[3][k]
-    
+        
 
     def __two_point_spline(self, dx: np.ndarray, dy: np.ndarray, BC: np.ndarray, Y: np.ndarray) -> list[np.ndarray]:
         """
