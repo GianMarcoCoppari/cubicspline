@@ -97,4 +97,5 @@ plt.show()
 
 ```
 to produce the following result.
+
 ![spline](./img/results/2d-spline.png)
