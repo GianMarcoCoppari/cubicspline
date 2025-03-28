@@ -1,28 +1,100 @@
-﻿# Interpolazione Polinomiale - Spline Cubica
+﻿# Cubic Spline Interpolation Project
 
-Progetto python che realizza una libreria che realizza l'interpolazione di un insieme di punti con algoritmo spline. 
-I coefficienti delle funzioni interpolanti sono calcolati risolvendo un sistema tridiagonale utilizzando un algoritmo di Decomposione LU ed un algoritmo di sostituzione indietro e avanti, in combinazione. 
+Python library project that implements the cubic spline interpolation between a given set of points. The interpolation coefficients are computed using an LU Decomposition and a Tridiagonal Linear System Solver Algorithm, both implemented within the project.
 
-## Struttura
-Ciascuno dei tre algoritmi è implementato nel proprio modulo python all'interno della cartella `code`.  Il file `lu.py` contiene l'algoritmo per la Decomposizione LU, partendo da tre `numpy.array` che rappresentano le tre diagonali, il file `tls.py` contiene l'implementazione delle funzioni `backward` e `foreward`, contenenti il codice necessario per la sostituzione indietro e avanti, rispettivamente; inoltre contiene una funzione `solver`, che fa da involucro alle due precedenti. L'invocazione della funzione `solver` richiama nell'ordine opportuno le altre due funzioni per risolvere il sistema. Infine il file `spline.py` contiene l'implementazione della classe `CubicSpline`; nel costruttore della classe vengono calcolati i coefficienti delle funzioni interpolanti, mentre il metodo `eval` permette di calcolare il valore della spline un qualsiasi altro punto compreso tra il nodo iniziale e finale. 
-Nella cartella `test` sono contenuti i test di verifica del codice, divisi per modulo. Se un modulo contiene più elementi da testare, il file contiene una sottoclasse della classe `unittest.TestCase` per ogni oggetto.
+## Structure
+Each of the three algorithms is implements in its own file, inside the folder `code`.  
+
+File `lu.py`  contains the algorithm for the LU Decomposition. The algorithm take as input three `numpy.array` representing the main diagonal and the two adjacient diagonals of the matrix
+File `tls.py` contains the implementation of forward and backward algorithm, splitted into functions `backward` e `forward`, respectively; in addition the function `solver`, wraps the two previous fuctions in the correct order so that the tridiagonal linear system associated with the input arrays is correctly solved.
+Lastly, file `spline.py`  contains the implementation of an object `CubicSpline`; it has a constructor, inside which the interpolation coefficients are computed and an `eval` method, which allow to compute the value of the spline for a given set of points betwenn the initial and final node. 
+
+Each file implements its own set of exception.
 
 ## Download e Utilizzo
 
-Scarica la repository con il comando
+Dowload the repository
 ```
 git clone https://github.com/GianMarcoCoppari/cubicspline.git
 ```
+so that you can use it directly from the terminal or inside a python script. In both cases you must run the python code from the inside of the `code` folde.
 
-Per utilizzare la libreria in un file python è necessario che questo sia nella stessa cartella `code`, o che i tre file siano disponibili in una delle cartelle in cui python cerca i moduli.
 
+### Routine di Test
 
-### Python Scripts
-Per includere la libreria nello script `file.py` assicurati di inserire il file nella stessa cartella del file `spline.py` o di includere la cartella `code` nella lista di cartelle da cui Python importa i moduli. Il modulo `CubicSpline` sarà quindi disponibile importandolo con la seguente linea di codice
+Tests have been written and run using `unittest` and `coverage` libraries, using the commands
 ```
-from spline import CubicSpline
+coverage run .\lu_test.py
+coverage html
 ```
+to check that the code was fully tested. The html page in which the output of the coverage test is written can be accessed using the line command `.\htmlcov\index.html`. In a similar way the test files `tls_test.py` and `spline_test.py` were run.
+
+Type hints have been tested using `mypy` library.
+
 
 ## Features
-L'obiettivo principarle del pacchetto è costruire una spline cubica, dato un insieme di punti sul piano e le appropriate condizioni al contorno sulle derivate prime della funzione. Tuttavia, il programma è anche in grado di effettuare la Decomposizione LU di matrici tridiagonali e risolvere sistemi lineari tridiagonali, ricevendo in input le tre diagonali principali che descrivono la matrice ed il sistema, rispettivamente.
-Gli algoritmi sono implementati nei moduli `lu.py` e `tls.py`, rispettivamente.
+
+The main aim of the prject is to compute a cubic spline, startinf from a given set of nodes.
+Beside this, the project is also capable, by construction, of 
+
+ - factorizing tridiagonal matrices using the LU decomposition algorithm.
+ - sovle tridiagonal linear systems
+ - compute cubic splines in two sptial dimensions.
+
+## Example
+Examples of how to use the library.
+For a unidimensional spline, the following code 
+```
+import  numpy  as  np
+import matplotlib.pyplot as plt
+import spline
+
+X   =  np.array([1, 4, 6, 8, 10])
+Y   =  np.array([2, -4, 5, 7, 3])
+BC  =  np.array([0, 0])
+cspline  =  spline.CubicSpline(X, Y, BC)
+
+
+nsamples  =  100
+x  =  np.linspace(X[0], X[-1], nsamples)
+
+plt.plot(X, Y, 'o')
+plt.plot(x, cspline.eval(x))
+
+plt.grid(True)
+plt.xlabel("X")
+plt.ylabel("Y")
+
+plt.show()
+```
+produce the following output.
+![spline](./img/results/example-spline.png)
+
+For a spline in two dimensions one can write
+```
+import numpy as np
+import matplotlib.pyplot as plt
+import spline
+
+t  = np.array([0, 1, 2, 3], dtype = np.float64)
+X  = np.array([0, 4, 3, -3], dtype = np.float64)
+Y  = np.array([0, 3, 6, 7], dtype = np.float64)
+BC = np.array([0, 0], dtype = np.float64)
+
+xspline = spline.CubicSpline(t, X, BC)
+yspline = spline.CubicSpline(t, Y, BC)
+
+nsamples = 100
+time = np.linspace(t[0], t[-1], nsamples)
+
+plt.grid(True)
+plt.xlabel("X")
+plt.ylabel("Y")
+
+plt.plot(X, Y, 'o')
+plt.plot(xspline.eval(time), yspline.eval(time))
+plt.show()
+
+```
+to produce the following result.
+![2d-spline](./img/results/2d-spline.png)
