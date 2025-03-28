@@ -1,34 +1,42 @@
 import unittest
 import numpy as np
-from lu import lu
+from lu import *
 
 class TestDecompositionLU(unittest.TestCase):
     # dimensional checks on input values
     def test_min_diagonal_size(self):
-        """ Check that the main diagonal has at least the minimum number of elements. 
-            If the number of elements in the main diagonal is less than two, it should raise an error.
+        """ 
+            Check that the main diagonal has at least the minimum number of elements. 
+            If the number of elements in the main diagonal is less than two, 
+            it raises an exception.
         """
 
         v = np.array([])
         u = np.array([1])
         w = np.array([])
 
-        with self.assertRaises(AssertionError):
+        with self.assertRaises(MinSizeException):
             lu(v, u, w)
-    def test_off_diagonal_equal_size(self):
-        """
-            Check that the off-diagonal have the same number of elements.
-            Exception raised if their size is different.
-        """
 
-        v = np.array([1])
-        u = np.array([1, 1])
-        w = np.array([1, 1])
-        with self.assertRaises(AssertionError):
-            lu(v, u, w)
-    def test_diagonal_upper_diagonal_size(self):
+
+    def test_diagonal_upper_diagonal_relative_size(self):
         """
             Check if the main diagonal and the upper diagonal have the relative right number of elements.
+            If the off diagonal has a numer of element different from 'n-1', 
+            where 'n' is the number of elements in the main diagonal it should raise and exception.
+        """
+
+        v = np.array([1, 1])
+        u = np.array([1, 1, 1])
+        w = np.array([1])
+        
+        with self.assertRaises(RelativeSizeException):
+            lu(v, u, w)
+
+
+    def test_diagonal_lower_diagonal_relative_size(self):
+        """
+            Check if the main diagonal and the lower diagonal have the relative right number of elements.
             If the off diagonal has a numer of element different from 'n-1', 
             where 'n' is the number of elements in the main diagonal it should raise and exception.
         """
@@ -37,21 +45,8 @@ class TestDecompositionLU(unittest.TestCase):
         u = np.array([1, 1, 1])
         w = np.array([1, 1])
         
-        with self.assertRaises(AssertionError):
-            lu(u, v, w)
-    def test_diagonal_lower_diagonal_size(self):
-        """
-            Check if the main diagonal and the lower diagonal have the relative right number of elements.
-            If the off diagonal has a numer of element different from 'n-1', 
-            where 'n' is the number of elements in the main diagonal it should raise and exception.
-        """
-
-        v = np.array([1, 1])
-        u = np.array([1, 1, 1])
-        w = np.array([1, 1, 1])
-        
-        with self.assertRaises(AssertionError):
-            lu(u, v, w)
+        with self.assertRaises(RelativeSizeException):
+            lu(v, u, w)
 
     # test known problems
     def test_known_solution(self):
@@ -174,3 +169,5 @@ class TestDecompositionLU(unittest.TestCase):
 
         with self.assertRaises(ZeroDivisionError):
             lu(v, u, w)
+
+unittest.main()

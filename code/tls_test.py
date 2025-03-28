@@ -14,7 +14,7 @@ class TestForewardSubstitution(unittest.TestCase):
         alpha = np.array([1])
         delta = np.array([])
 
-        with self.assertRaises(AssertionError):
+        with self.assertRaises(tls.MinSizeException):
             tls.forward(beta, alpha, delta)
     
     def test_diagonal_dimension(self):
@@ -26,7 +26,7 @@ class TestForewardSubstitution(unittest.TestCase):
         alpha = np.array([1, 2])
         delta = np.array([2, 2, 2])
 
-        with self.assertRaises(AssertionError):
+        with self.assertRaises(tls.RelativeSizeException):
             tls.forward(beta, alpha, delta)
     
     def test_diagonal_off_diagonal_size(self):
@@ -38,7 +38,7 @@ class TestForewardSubstitution(unittest.TestCase):
         alpha = np.array([2, 2])
         delta = np.array([2, 2])
 
-        with self.assertRaises(AssertionError):
+        with self.assertRaises(tls.RelativeSizeException):
             tls.forward(beta, alpha, delta)
 
     #check divisions by zero
@@ -96,7 +96,7 @@ class TestBackwardSubstitution(unittest.TestCase):
         gamma = np.array([])
         temp = np.array([1])
 
-        with self.assertRaises(AssertionError):
+        with self.assertRaises(tls.MinSizeException):
             tls.backward(gamma, temp)
 
     def test_size(self):
@@ -108,7 +108,7 @@ class TestBackwardSubstitution(unittest.TestCase):
         gamma = np.array([1, 1, 1])
         temp = np.array([1, 1, 1])
         
-        with self.assertRaises(AssertionError):
+        with self.assertRaises(tls.RelativeSizeException):
             tls.backward(gamma, temp)
 
     # check known solution
@@ -229,3 +229,5 @@ class TestSolver(unittest.TestCase):
         xbackward = tls.backward(gamma, delta/alpha)
         
         self.assertTrue(np.allclose(xsolver, xbackward))
+
+unittest.main()

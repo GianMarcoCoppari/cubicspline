@@ -2,6 +2,17 @@
 Defines the CubicSpline class.
 """
 
+class MinSizeException(Exception):
+    pass
+class RelativeSizeException(Exception):
+    pass
+class UniqueNodeException(Exception):
+    pass
+class UnorderedSetException(Exception):
+    pass
+class BoundaryConditionException(Exception):
+    pass
+
 import numpy as np
 from lu import lu
 from tls import solver
@@ -48,15 +59,15 @@ class CubicSpline():
             - x values for nodes are not ordered.
         """
         if len(X) < 2:
-            raise AssertionError
+            raise MinSizeException("Less than two nodes proveided.")
         if len(X) != len(Y):
-            raise AssertionError
+            raise RelativeSizeException("X and Y do not ha same size.")
         if len(X) != len(np.unique(X)):
-            raise AssertionError
+            raise UniqueNodeException("X does not contain unique elements.")
         if not np.all(np.diff(X) > 0):
-            raise AssertionError
+            raise UnorderedSetException("X elements are unordered.")
         if len(BC) != 2:
-            raise AssertionError
+            raise BoundaryConditionException("Exactly two boundary conditions are required.")
 
         self.nodes = X
         self.size = len(X) - 1

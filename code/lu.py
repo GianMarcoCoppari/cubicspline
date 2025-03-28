@@ -2,8 +2,15 @@
 Defines the LU matrix decomposition algorithm. It is specialized for tridiagonal matrices.
 """
 
+class MinSizeException(Exception):
+    pass
+class OffDiagonalSizeException(Exception):
+    pass
+class RelativeSizeException(Exception):
+    pass
 
 import numpy as np
+
 
 def lu(v: np.ndarray, u: np.ndarray, w: np.ndarray) -> list[np.ndarray]:
     """ 
@@ -25,20 +32,17 @@ def lu(v: np.ndarray, u: np.ndarray, w: np.ndarray) -> list[np.ndarray]:
 
         Raises
         -----------------
-        AssertionError: one of the following conditions are met:
-            - diagonal array has size less than two
-            - off-diagonal elements do not match in size
-            - diagonal and off-diagonal elements do not have proper relatie size
-        ZeroDivisionError: when division by 0 is met during the algorithm.
+        - MinSizeException: if the array associaed with the main diagonal has less than two elements.
+        - RelativeSizeException: if either one of the two off diagonal has a number of element different from the number of elements in the main diagonal minus one.
+        - ZeroDivisionError: when division by 0 is met during the algorithm.
     """
 
     if len(u) < 2:
-        raise AssertionError
-    if len(v) != len(w):
-        raise AssertionError
+        raise MinSizeException("main diagonal has less than 2 elements.")
     if len(u) != len(v) + 1:
-        raise AssertionError
-
+        raise RelativeSizeException("Diagonal and lower diagonal arrays do not have the correct relative size.")
+    if len(u) != len(w) + 1:
+        raise RelativeSizeException("Diagonal and upper diagonal arrays do not have proper relative size.")
 
     pars = np.array([u[1:], v, w], dtype = np.float64)
     

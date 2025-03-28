@@ -2,8 +2,12 @@
 Defines the foreward-backward algorithm to solve tridiagonal linear systems.
 """
 
-
 import numpy as np
+
+class MinSizeException(Exception):
+    pass
+class RelativeSizeException(Exception):
+    pass
 
 def backward(gamma: np.ndarray, temp: np.ndarray) -> np.ndarray:
     """ 
@@ -23,15 +27,14 @@ def backward(gamma: np.ndarray, temp: np.ndarray) -> np.ndarray:
 
         Raises
         -----------------
-        AssertionError: if one of the following conditions are met:
-            - system size is less than two.
-            - diagonal and off-diagonal elements do not have proper relatie size
+        - MinSizeException: if the main diagonal has less than two elements.
+        - RelativeSizeException: if the main diagonal and the upper diagonal do not have the correct relative number of elements.
     """
 
     if len(temp) < 2:
-        raise AssertionError
+        raise MinSizeException("Main diagonal has less than two elements.")
     if len(temp) != len(gamma) + 1:
-        raise AssertionError
+        raise RelativeSizeException("Main diagonal and upper diagonal do not have the correct relative number of elements.")
     
 
     sol = temp[-1:]
@@ -60,20 +63,19 @@ def forward(beta: np.ndarray, alpha: np.ndarray, delta: np.ndarray) -> np.ndarra
 
         Raises
         -----------------
-        AssertionError: if one of the following conditions are met:
-            - system size is less than two.
-            - diagonal and off-diagonal elements do not have proper relatie size
-        ValueError: if alpha contains any null value.
+        - MinSizeException: if the main diagonal has less than two elements.
+        - RelativeSizeException: either when the main diagonal and the known values arrays do not have the same number of elements or when the main diagonal and the lower diagonal do not have the correct relative number of elements.
+        - ValueError: if alpha contains any null value.
     """
 
-    if len(alpha) < 2 or len(delta) < 2:
-        raise AssertionError
+    if len(alpha) < 2:
+        raise MinSizeException("Main diagonal has less than two elements.")
     if len(alpha) != len(delta):
-        raise AssertionError
+        raise RelativeSizeException("Main diagonal and known values have different size.")
     if len(alpha) != len(beta) + 1:
-        raise AssertionError
+        raise RelativeSizeException("Main diagonal and lower diagonal do not have the correct relative size.")
     if len(alpha[alpha == 0]) != 0:
-        raise ValueError
+        raise ValueError("Main diagonal contains one or more null element.")
 
     temp = np.array([delta[0] / alpha[0]])
     
